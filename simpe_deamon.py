@@ -54,4 +54,4 @@ def stop(main_thread):
 
 def test(main_thread):
     # TODO Exception handler
-    return f'{main_thread.is_alive()} {main_thread}'
+    return f'{main_thread}'

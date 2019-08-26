@@ -5,5 +5,5 @@ import pandas as pd
 
 def mutate_data(data):
     mutated = np.array(data)
-    print(f'TODO ML for {data}')
+    print(f'TODO ML. it is already {type(mutated)}')
     return mutated

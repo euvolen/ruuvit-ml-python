@@ -6,32 +6,32 @@ thread = None
 
 
 class Start(Resource):
-    def get(self):
+    def post(self):
         global thread
         if thread is None:
             thread = start()
-            return {'msg': 'Started', 'success': True}
+            return {'msg': f'{thread} is started', 'status': True}
         if not thread.is_alive():
             thread = start()
-            return {'msg': 'Started', 'success': True}
+            return {'msg': f'{thread} is started', 'status': True}
         else:
-            return {'msg': 'Thread has been started already', 'success': False}
+            return {'msg': 'Thread has been started already', 'status': True}
 
 
 class Stop(Resource):
-    def get(self):
+    def post(self):
         if thread is None:
-            return {'msg': 'No running processes', 'success': False}
+            return {'msg': 'No running threads', 'status': False}
         if thread.is_alive():
             stop(thread)
-            return {'msg': 'stopped', 'success': True}
+            return {'msg': f'{thread} stopped', 'status': False}
         else:
-            return {'msg': 'Thread has been stopped already', 'success': False}
+            return {'msg': 'Thread has been stopped already', 'status': False}
 
 
 class Test(Resource):
-    def get(self):
+    def post(self):
         if thread is not None:
-            return { 'is thread alive': test(thread)}
+            return { 'msg': test(thread), 'test': True}
         else:
-            return  { 'is thread alive': 'No running threads'}
+            return  { 'msg': 'No running threads', 'test':True}
