@@ -1,25 +1,10 @@
 from threading import Thread, Event
-import time
+from sleeper import Sleep
 from connect_mongo import get_all_users, update_db
+from connect_influx import get_userdata, erase_db
 from ml_mutation import mutate_data
 started = True
 data = None
-
-class Sleep():
-    def __init__(self, seconds=600, immediate=False):
-        self.seconds = seconds
-        self.event = Event()
-        if immediate:
-            self.sleep()
-
-    def sleep(self, seconds=None):
-        if seconds is None:
-            seconds = self.seconds
-        self.event.clear()
-        self.event.wait(timeout=seconds)
-
-    def wake(self):
-        self.event.set()
 
 s = Sleep()
 
@@ -27,8 +12,15 @@ def get_data(sleeper):
     count = 0
     while started:
         global data
-        data = get_all_users()
-        #TODO ML alghorithm
+        data = [u['rbl'] for u in get_all_users()]
+        threads = []
+
+        for rbl in data:
+            threads.append(start(get_userdata))
+
+        for t in threads:
+            t.join()
+
         mutated = mutate_data(data)
         update_db('users', str(count))
         count +=1
@@ -36,11 +28,11 @@ def get_data(sleeper):
 
 
 
-def start():
+def start(func):
     #TODO Exception handler and Decorator probably?
     global started
     started = True
-    main_thread = Thread(target=get_data, args=[s])
+    main_thread = Thread(target=func if func else get_data, args=[s])
     main_thread.start()
     return main_thread
 

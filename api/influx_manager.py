@@ -1,37 +1,43 @@
 from flask_restful import Resource
-from simpe_deamon import start, stop, test
+from sleeper import Sleep
+from thread_fb import create_thread
+from workers.influx_manager import influx_to_mongo_loop, stop_worker, start_worker
 #TODO Security, Auth - admin level
 
+
+
 thread = None
+sleep = Sleep()
 
-
-class Start(Resource):
-    def post(self):
+class InfluxStart(Resource):
+    def get(self):
         global thread
         if thread is None:
-            thread = start()
+            thread = create_thread(influx_to_mongo_loop, sleep)
+            thread.start()
             return {'msg': f'{thread} is started', 'status': True}
         if not thread.is_alive():
-            thread = start()
+            start_worker()
+            thread = create_thread(influx_to_mongo_loop, sleep)
+            thread.start()
             return {'msg': f'{thread} is started', 'status': True}
         else:
             return {'msg': 'Thread has been started already', 'status': True}
 
 
-class Stop(Resource):
-    def post(self):
+class InfluxStop(Resource):
+    def get(self):
         if thread is None:
             return {'msg': 'No running threads', 'status': False}
         if thread.is_alive():
-            stop(thread)
+            stop_worker()
+            sleep.wake()
+            thread.join()
             return {'msg': f'{thread} stopped', 'status': False}
         else:
             return {'msg': 'Thread has been stopped already', 'status': False}
 
 
-class Test(Resource):
-    def post(self):
-        if thread is not None:
-            return { 'msg': test(thread), 'test': True}
-        else:
-            return  { 'msg': 'No running threads', 'test':True}
+class InfluxTest(Resource):
+    def get(self):
+      return f'{thread}'

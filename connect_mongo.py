@@ -12,9 +12,14 @@ def get_collection_by_name(name):
     return data
 
 
-def update_db(name, data= 'Volen'):
+def update_db(name, data= 'Volen', id=None):
     updated = f'Volen {data}'
-    with MongoClient(url) as client:
-        users = client.get_database()[name].update_many({'firstname':'Evgenii'}, {'$set': {'lastname': updated}})
-    return users
+    if id:
+        with MongoClient(url) as client:
+            client.get_database()[name].update_many({'patient': id}, {'$set': {data}})
+        return
+    else:
+        with MongoClient(url) as client:
+            users = client.get_database()[name].update_many({'firstname':'Evgenii'}, {'$set': {'lastname': updated}})
+        return users
 
