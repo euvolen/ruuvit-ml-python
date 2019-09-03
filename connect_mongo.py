@@ -20,6 +20,14 @@ def update_db(name, data= 'Volen', id=None):
         return
     else:
         with MongoClient(url) as client:
-            users = client.get_database()[name].update_many({'firstname':'Evgenii'}, {'$set': {'lastname': updated}})
+            users = client.get_database()[name].update_many({'email':'euvolen@gmail.com'}, {'$set': {'lastname': updated}})
         return users
 
+def get_user_by_email(email):
+    with MongoClient(url) as client:
+        try:
+            user = client.get_database()['users'].find_one({'email': email})
+        except TypeError:
+            return {}
+        else:
+            return user

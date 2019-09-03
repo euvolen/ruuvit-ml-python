@@ -1,4 +1,6 @@
 from flask_restful import Resource
+from flask_cors import cross_origin
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from thread_fb import  create_thread
 from workers.ml_manager import get_data, start_worker, stop_worker
 from sleeper import Sleep
@@ -9,7 +11,8 @@ thread = None
 sleep = Sleep()
 
 class ML_Start(Resource):
-    def get(self):
+    @jwt_required
+    def post(self):
         global thread
         if thread is None:
             thread = create_thread(get_data, sleep)
@@ -25,7 +28,8 @@ class ML_Start(Resource):
 
 
 class ML_Stop(Resource):
-    def get(self):
+    @jwt_required
+    def post(self):
         if thread is None:
             return {'msg': 'No running threads', 'status': False}
         if thread.is_alive():
@@ -38,5 +42,9 @@ class ML_Stop(Resource):
 
 
 class ML_Test(Resource):
-    def get(self):
-      return f'{thread}'
+    @cross_origin()
+    @jwt_required
+    def post(self):
+        current = get_jwt_identity()
+        print(current)
+        return {'msg':f'{thread}', 'test':True}
